@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Bootstrap: Landing Zone Artifacts Storage"
+
+Resources:
+  ArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: hyoacloud-landing-zone-cfn-artifacts
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionAndExpireArtifacts
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90
+                StorageClass: STANDARD_IA
+              - TransitionInDays: 365
+                StorageClass: GLACIER
+            ExpirationInDays: 1095
+            NoncurrentVersionTransitions:
+              - TransitionInDays: 30
+                StorageClass: STANDARD_IA
+              - TransitionInDays: 90
+                StorageClass: GLACIER
+            NoncurrentVersionExpirationInDays: 365
+
+  ArtifactsBucketNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/iac/landing-zone/artifacts-bucket-name"
+      Description: "The name of the S3 bucket for CloudFormation artifacts"
+      Type: String
+      Value: !Ref ArtifactsBucket
+
+  ArtifactsBucketArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/iac/landing-zone/artifacts-bucket-arn"
+      Description: "The ARN of the S3 bucket for CloudFormation artifacts"
+      Type: String
+      Value: !GetAtt ArtifactsBucket.Arn
+
+  ArtifactsBucketDomainNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/iac/landing-zone/artifacts-bucket-domain-name"
+      Description: "The domain name of the S3 bucket"
+      Type: String
+      Value: !GetAtt ArtifactsBucket.DomainName
+
+Outputs:
+  ArtifactsBucketName:
+    Description: "The name of the S3 bucket for CloudFormation artifacts"
+    Value: !Ref ArtifactsBucket
+    Export:
+      Name: ArtifactsBucketName
+
+  ArtifactsBucketArn:
+    Description: "The ARN of the S3 bucket for CloudFormation artifacts"
+    Value: !GetAtt ArtifactsBucket.Arn
+    Export:
+      Name: ArtifactsBucketArn
+
+  ArtifactsBucketDomainName:
+    Description: "The domain name of the S3 bucket"
+    Value: !GetAtt ArtifactsBucket.DomainName
+    Export:
+      Name: ArtifactsBucketDomainName

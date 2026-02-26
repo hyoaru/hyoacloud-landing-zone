@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Initialize AWS Organization and Trusted Services Access"
+
+Resources:
+  Organization:
+    Type: AWS::Organizations::Organization
+    Properties:
+      FeatureSet: ALL
+
+  OrganizationAccountIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/iac/landing-zone/organization-account-id"
+      Description: "The ID of the account of the AWS Organization"
+      Type: String
+      Value: !Ref Organization
+
+  OrganizationIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/iac/landing-zone/organization-id"
+      Description: "The ID of the AWS Organization"
+      Type: String
+      Value: !GetAtt Organization.Id
+
+  OrganizationArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/iac/landing-zone/organization-arn"
+      Description: "The ARN of the AWS Organization"
+      Type: String
+      Value: !GetAtt Organization.Arn
+
+Outputs:
+  OrganizationAccountId:
+    Description: "The ID of the account of the AWS Organization"
+    Value: !Ref Organization
+    Export:
+      Name: OrganizationAccountId
+
+  OrganizationId:
+    Description: "The ID of the AWS Organization"
+    Value: !GetAtt Organization.Id
+    Export:
+      Name: OrganizationId
+
+  OrganizationArn:
+    Description: "The ARN of the AWS Organization"
+    Value: !GetAtt Organization.Arn
+    Export:
+      Name: OrganizationArn
