@@ -7,7 +7,6 @@ BUILD_DIR="$PROJECT_ROOT/.aws-cfn"
 
 if [ -f "$PROJECT_ROOT/.env" ]; then
   echo "Loading environment variables from .env"
-  # Export variables from .env, ignoring comments and empty lines
   export $(grep -v '^#' "$PROJECT_ROOT/.env" | xargs)
 else
   echo "Error: .env file not found at $PROJECT_ROOT/.env"
@@ -31,6 +30,8 @@ aws cloudformation create-change-set \
     ParameterKey=ToolingCoreAccountEmail,ParameterValue="$TOOLING_CORE_ACCOUNT_EMAIL" \
     ParameterKey=ProductionWorkloadAccountEmail,ParameterValue="$PRODUCTION_WORKLOAD_ACCOUNT_EMAIL" \
     ParameterKey=StagingWorkloadAccountEmail,ParameterValue="$STAGING_WORKLOAD_ACCOUNT_EMAIL" \
+    ParameterKey=IdentityCenterInstanceArn,ParameterValue="$IDENTITY_CENTER_INSTANCE_ARN" \
+    ParameterKey=IdentityCenterIdentityStoreId,ParameterValue="$IDENTITY_CENTER_IDENTITY_STORE_ID" \
   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
   > /dev/null
 echo
