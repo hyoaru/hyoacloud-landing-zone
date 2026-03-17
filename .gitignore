@@ -1,2 +1,3 @@
 .aws-cfn
 .env
+.DS_Store
