@@ -5,22 +5,24 @@ Parameters:
   LogArchiveCoreAccountEmail:
     Type: String
     Description: "Email address for the Log Archive core account"
-
   SecurityCoreAccountEmail:
     Type: String
     Description: "Email address for the Security core account"
-
   ToolingCoreAccountEmail:
     Type: String
     Description: "Email address for the Tooling core account"
-
   ProductionWorkloadAccountEmail:
     Type: String
     Description: "Email address for the Production Workload account"
-
   StagingWorkloadAccountEmail:
     Type: String
     Description: "Email address for the Staging Workload account"
+  IdentityCenterInstanceArn:
+    Type: String
+    Description: The ARN of the SSO Instance
+  IdentityCenterIdentityStoreId:
+    Type: String
+    Description: The Identity Store ID
 
 Resources:
   OrganizationStack:
@@ -28,14 +30,14 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      TemplateURL: ./stacks/organization.yaml 
+      TemplateURL: ./stacks/organization/stack.yaml 
 
   AccountsStack:
     Type: AWS::CloudFormation::Stack
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      TemplateURL: ./stacks/accounts.yaml
+      TemplateURL: ./stacks/accounts/stack.yaml
       Parameters:
         CoreOuId: !GetAtt OrganizationStack.Outputs.CoreOuId
         WorkloadOuId: !GetAtt OrganizationStack.Outputs.WorkloadOuId
@@ -44,3 +46,16 @@ Resources:
         ToolingCoreAccountEmail: !Ref ToolingCoreAccountEmail
         ProductionWorkloadAccountEmail: !Ref ProductionWorkloadAccountEmail
         StagingWorkloadAccountEmail: !Ref StagingWorkloadAccountEmail
+
+  IdentityCenterStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./stacks/identity-center/stack.yaml
+      Parameters:
+        IdentityCenterInstanceArn: !Ref IdentityCenterInstanceArn
+        IdentityCenterIdentityStoreId: !Ref IdentityCenterIdentityStoreId
+        LogArchiveCoreAccountId: !GetAtt AccountsStack.Outputs.LogArchiveCoreAccountId
+        SecurityCoreAccountId: !GetAtt AccountsStack.Outputs.SecurityCoreAccountId
+        ToolingCoreAccountId: !GetAtt AccountsStack.Outputs.ToolingCoreAccountId
+        ProductionWorkloadAccountId: !GetAtt AccountsStack.Outputs.ProductionWorkloadAccountId
+        StagingWorkloadAccountId: !GetAtt AccountsStack.Outputs.StagingWorkloadAccountId
