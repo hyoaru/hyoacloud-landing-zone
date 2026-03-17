@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Landing Zone Stack: Organization"
+
+Resources:
+  Organization:
+    Type: AWS::Organizations::Organization
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FeatureSet: ALL
+
+  CoreOu:
+    Type: AWS::Organizations::OrganizationalUnit
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Name: Core
+      ParentId: !Ref Organization
+
+  WorkloadOu:
+    Type: AWS::Organizations::OrganizationalUnit
+    Properties:
+      Name: Workload
+      ParentId: !Ref Organization
+
+Outputs:
+  OrganizationId:
+    Description: "The ID of the AWS Organization"
+    Value: !GetAtt Organization.Id
+    Export:
+      Name: hyoacloud-organization-id
+
+  CoreOuId:
+    Description: "The ID of the Core Organizational Unit"
+    Value: !Ref CoreOu
+    Export:
+      Name: hyoacloud-core-ou-id
+
+  WorkloadOuId:
+    Description: "The ID of the Workload Organizational Unit"
+    Value: !Ref WorkloadOu
+    Export:
+      Name: hyoacloud-workload-ou-id
