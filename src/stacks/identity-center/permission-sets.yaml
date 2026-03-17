@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Landing Zone Identity Center: Permission Sets"
+
+Parameters:
+  IdentityCenterInstanceArn:
+    Type: String
+    Description: The ARN of the SSO Instance
+
+Resources:
+  PlatformAdministratorsPermissionSet:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref IdentityCenterInstanceArn
+      Name: PlatformAdministratorsAccess
+      Description: Full Administrative Access
+      ManagedPolicies:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      SessionDuration: PT1H
+
+Outputs:
+  PlatformAdministratorsPermissionSetArn:
+    Description: ARN of the Platform Administrators Permission Set
+    Value: !GetAtt PlatformAdministratorsPermissionSet.PermissionSetArn

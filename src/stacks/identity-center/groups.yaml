@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Landing Zone Identity Center: Groups"
+
+Parameters:
+  IdentityCenterIdentityStoreId:
+    Type: String
+    Description: The Identity Store ID
+
+Resources:
+  PlatformAdministratorsGroup:
+    Type: AWS::IdentityStore::Group
+    Properties:
+      IdentityStoreId: !Ref IdentityCenterIdentityStoreId
+      DisplayName: PlatformAdministrators
+      Description: Group for Cloud Administrators with full access
+
+Outputs:
+  PlatformAdministratorsGroupId:
+    Description: ID of the PlatformAdministrators Group
+    Value: !GetAtt PlatformAdministratorsGroup.GroupId

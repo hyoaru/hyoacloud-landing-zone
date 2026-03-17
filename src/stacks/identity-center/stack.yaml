@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Landing Zone Stack: Identity Center"
+
+Parameters:
+  IdentityCenterInstanceArn:
+    Type: String
+    Description: The ARN of the SSO Instance
+  IdentityCenterIdentityStoreId:
+    Type: String
+    Description: The Identity Store ID
+  SecurityCoreAccountId:
+    Type: String
+    Description: Account ID of the Security core account
+  LogArchiveCoreAccountId:
+    Type: String
+    Description: Account ID of the Log Archive core account
+  ToolingCoreAccountId:
+    Type: String
+    Description: Account ID of the Tooling core account
+  ProductionWorkloadAccountId:
+    Type: String
+    Description: Account ID of the Production Workload account
+  StagingWorkloadAccountId:
+    Type: String
+    Description: Account ID of the Staging Workload account
+
+Resources:
+  GroupsStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./groups.yaml
+      Parameters:
+        IdentityCenterIdentityStoreId: !Ref IdentityCenterIdentityStoreId
+
+  PermissionSetsStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./permission-sets.yaml
+      Parameters:
+        IdentityCenterInstanceArn: !Ref IdentityCenterInstanceArn
+
+  AccountAssignmentStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./account-assignment.yaml
+      Parameters:
+        IdentityCenterInstanceArn: !Ref IdentityCenterInstanceArn
+        LogArchiveCoreAccountId: !Ref LogArchiveCoreAccountId
+        SecurityCoreAccountId: !Ref SecurityCoreAccountId
+        ToolingCoreAccountId: !Ref ToolingCoreAccountId
+        ProductionWorkloadAccountId: !Ref ProductionWorkloadAccountId
+        StagingWorkloadAccountId: !Ref StagingWorkloadAccountId
+        PlatformAdministratorsGroupId: !GetAtt GroupsStack.Outputs.PlatformAdministratorsGroupId
+        PlatformAdministratorsPermissionSetArn: !GetAtt PermissionSetsStack.Outputs.PlatformAdministratorsPermissionSetArn

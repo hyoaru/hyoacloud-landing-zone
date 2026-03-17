@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Landing Zone Identity Center: Account Assignment"
+
+Parameters:
+  IdentityCenterInstanceArn:
+    Type: String
+    Description: The ARN of the SSO Instance
+  LogArchiveCoreAccountId:
+    Type: String
+    Description: Account ID of the Log Archive core account
+  SecurityCoreAccountId:
+    Type: String
+    Description: Account ID of the Security core account
+  ToolingCoreAccountId:
+    Type: String
+    Description: Account ID of the Tooling core account
+  ProductionWorkloadAccountId:
+    Type: String
+    Description: Account ID of the Production Workload account
+  StagingWorkloadAccountId:
+    Type: String
+    Description: Account ID of the Staging Workload account
+  PlatformAdministratorsGroupId:
+    Type: String
+    Description: ID of the Platform Administrators Group
+  PlatformAdministratorsPermissionSetArn:
+    Type: String
+    Description: ARN of the Platform Administrators Permission Set
+  
+Resources:
+  LogArchivePlatformAdministratorsAssignment:
+    Type: AWS::SSO::Assignment
+    Properties:
+      InstanceArn: !Ref IdentityCenterInstanceArn
+      PermissionSetArn: !Ref PlatformAdministratorsPermissionSetArn
+      PrincipalId: !Ref PlatformAdministratorsGroupId
+      PrincipalType: GROUP
+      TargetId: !Ref LogArchiveCoreAccountId
+      TargetType: AWS_ACCOUNT
+
+  SecurityPlatformAdministratorsAssignment:
+    Type: AWS::SSO::Assignment
+    Properties:
+      InstanceArn: !Ref IdentityCenterInstanceArn
+      PermissionSetArn: !Ref PlatformAdministratorsPermissionSetArn
+      PrincipalId: !Ref PlatformAdministratorsGroupId
+      PrincipalType: GROUP
+      TargetId: !Ref SecurityCoreAccountId
+      TargetType: AWS_ACCOUNT
+
+  ToolingPlatformAdministratorsAssignment:
+    Type: AWS::SSO::Assignment
+    Properties:
+      InstanceArn: !Ref IdentityCenterInstanceArn
+      PermissionSetArn: !Ref PlatformAdministratorsPermissionSetArn
+      PrincipalId: !Ref PlatformAdministratorsGroupId
+      PrincipalType: GROUP
+      TargetId: !Ref ToolingCoreAccountId
+      TargetType: AWS_ACCOUNT
+  
+  ProductionPlatformAdministratorsAssignment:
+    Type: AWS::SSO::Assignment
+    Properties:
+      InstanceArn: !Ref IdentityCenterInstanceArn
+      PermissionSetArn: !Ref PlatformAdministratorsPermissionSetArn
+      PrincipalId: !Ref PlatformAdministratorsGroupId
+      PrincipalType: GROUP
+      TargetId: !Ref ProductionWorkloadAccountId
+      TargetType: AWS_ACCOUNT
+
+  StagingPlatformAdministratorsAssignment:
+    Type: AWS::SSO::Assignment
+    Properties:
+      InstanceArn: !Ref IdentityCenterInstanceArn
+      PermissionSetArn: !Ref PlatformAdministratorsPermissionSetArn
+      PrincipalId: !Ref PlatformAdministratorsGroupId
+      PrincipalType: GROUP
+      TargetId: !Ref StagingWorkloadAccountId
+      TargetType: AWS_ACCOUNT
+  
