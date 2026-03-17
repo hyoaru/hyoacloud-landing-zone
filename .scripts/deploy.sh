@@ -3,22 +3,66 @@ set -euo pipefail
 
 SCRIPTS_DIR=$(cd $(dirname $0) && pwd)
 PROJECT_ROOT=$(cd "$SCRIPTS_DIR/.." && pwd)
+BUILD_DIR="$PROJECT_ROOT/.aws-cfn"
 
-artifacts_bucket=$(
-  aws ssm get-parameter \
-    --name "/iac/landing-zone/artifacts-bucket-name" \
-    --query "Parameter.Value" \
-    --output text
-)
+if [ -f "$PROJECT_ROOT/.env" ]; then
+  echo "Loading environment variables from .env"
+  # Export variables from .env, ignoring comments and empty lines
+  export $(grep -v '^#' "$PROJECT_ROOT/.env" | xargs)
+else
+  echo "Error: .env file not found at $PROJECT_ROOT/.env"
+  exit 1
+fi
 
-packaged_template_path="/tmp/landing-zone-packaged-stack.yaml"
+STACK_NAME="HyoacloudLandingZone"
+CHANGE_SET_NAME="$STACK_NAME-ChangeSet-$(date +%s)"
+REGION="ap-southeast-1"
+PACKAGED_TEMPLATE="$BUILD_DIR/template.yaml"
 
-aws cloudformation package \
-  --template-file "$PROJECT_ROOT/stack.yaml" \
-  --s3-bucket $artifacts_bucket \
-  --output-template-file $packaged_template_path \
-  >/dev/null
+echo "Deploying the project: $STACK_NAME in region: $REGION using change set: $CHANGE_SET_NAME"
+aws cloudformation create-change-set \
+  --stack-name "$STACK_NAME" \
+  --change-set-name "$CHANGE_SET_NAME" \
+  --template-body "file://$PACKAGED_TEMPLATE" \
+  --region "$REGION" \
+  --parameters \
+    ParameterKey=LogArchiveCoreAccountEmail,ParameterValue="$LOG_ARCHIVE_CORE_ACCOUNT_EMAIL" \
+    ParameterKey=SecurityCoreAccountEmail,ParameterValue="$SECURITY_CORE_ACCOUNT_EMAIL" \
+    ParameterKey=ToolingCoreAccountEmail,ParameterValue="$TOOLING_CORE_ACCOUNT_EMAIL" \
+    ParameterKey=ProductionWorkloadAccountEmail,ParameterValue="$PRODUCTION_WORKLOAD_ACCOUNT_EMAIL" \
+    ParameterKey=StagingWorkloadAccountEmail,ParameterValue="$STAGING_WORKLOAD_ACCOUNT_EMAIL" \
+  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+  > /dev/null
+echo
 
-aws cloudformation deploy \
-  --stack-name "landing-zone" \
-  --template-file $packaged_template_path
+echo "Waiting for change set to be ready"
+aws cloudformation wait change-set-create-complete \
+  --stack-name "$STACK_NAME" \
+  --change-set-name "$CHANGE_SET_NAME"
+echo
+
+echo "Previewing changes in the change set: $CHANGE_SET_NAME for stack: $STACK_NAME"
+AWS_PAGER="" aws cloudformation describe-change-set \
+  --stack-name "$STACK_NAME" \
+  --change-set-name "$CHANGE_SET_NAME" \
+  --query "Changes[*].ResourceChange" \
+  --output table
+echo
+
+read -p "Do you want to execute this change set? (y/N) " is_confirm
+if [ "$is_confirm" = "y" ] || [ "$is_confirm" = "Y" ]; then
+    echo "Executing Change Set..."
+    aws cloudformation execute-change-set \
+      --stack-name "$STACK_NAME" \
+      --change-set-name "$CHANGE_SET_NAME"
+
+    echo "Waiting for stack update to complete."
+    aws cloudformation wait stack-update-complete \
+      --stack-name "$STACK_NAME"
+
+    echo "Deployment executed successfully."
+else
+    echo "Change Set not executed. Exiting."
+fi
+
+echo

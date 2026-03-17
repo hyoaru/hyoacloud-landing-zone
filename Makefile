@@ -1,18 +1,17 @@
-.PHONY: lint bootstrap deploy
+.PHONY: lint bootstrap build deploy
 
 lint:
-	@echo "Linting the project"
+	@chmod +x .scripts/lint.sh
 	.scripts/lint.sh
-	@echo "Successfully linted the project"
-
-bootstrap:
-	@echo "Bootstrapping the project"
+	
+bootstrap: lint
+	@chmod +x .scripts/bootstrap.sh
 	.scripts/bootstrap.sh
-	@echo "Successfully bootstrapped the project"
 
-deploy:
-	@echo "Deploying the project"
+build: lint
+	@chmod +x .scripts/build.sh
+	.scripts/build.sh
+
+deploy: build
+	@chmod +x .scripts/deploy.sh
 	.scripts/deploy.sh
-	@echo "Successfully deployed the project"
-
-
