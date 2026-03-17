@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Landing Zone Stack: Accounts"
+
+Parameters:
+  CoreOuId:
+    Type: String
+    Description: "The ID of the Core Organizational Unit"
+
+  WorkloadOuId:
+    Type: String
+    Description: "The ID of the Workload Organizational Unit"
+
+  LogArchiveCoreAccountEmail:
+    Type: String
+    Description: "Email address for the Log Archive core account"
+
+  SecurityCoreAccountEmail:
+    Type: String
+    Description: "Email address for the Security core account"
+
+  ToolingCoreAccountEmail:
+    Type: String
+    Description: "Email address for the Tooling core account"
+
+  ProductionWorkloadAccountEmail:
+    Type: String
+    Description: "Email address for the Production Workload account"
+
+  StagingWorkloadAccountEmail:
+    Type: String
+    Description: "Email address for the Staging Workload account"
+
+Resources:
+  LogArchiveCoreAccount:
+    Type: AWS::Organizations::Account
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      AccountName: "Log Archive"
+      Email: !Ref LogArchiveCoreAccountEmail
+      ParentIds: [!Ref CoreOuId]
+
+  SecurityCoreAccount:
+    Type: AWS::Organizations::Account
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      AccountName: "Security"
+      Email: !Ref SecurityCoreAccountEmail
+      ParentIds: [!Ref CoreOuId]
+
+  ToolingCoreAccount:
+    Type: AWS::Organizations::Account
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      AccountName: "Tooling"
+      Email: !Ref ToolingCoreAccountEmail
+      ParentIds: [!Ref CoreOuId]
+
+  ProductionWorkloadAccount:
+    Type: AWS::Organizations::Account
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      AccountName: "Production"
+      Email: !Ref ProductionWorkloadAccountEmail
+      ParentIds: [!Ref WorkloadOuId]
+
+  StagingWorkloadAccount:
+    Type: AWS::Organizations::Account
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      AccountName: "Staging"
+      Email: !Ref StagingWorkloadAccountEmail
+      ParentIds: [!Ref WorkloadOuId]
+
+Outputs:
+  LogArchiveCoreAccountId:
+    Description: "The ID of the Log Archive core account"
+    Value: !Ref LogArchiveCoreAccount
+    Export:
+      Name: Hyoacloud-LogArchiveCoreAccount-Id
+
+  SecurityCoreAccountId:
+    Description: "The ID of the Security core account"
+    Value: !Ref SecurityCoreAccount
+    Export:
+      Name: Hyoacloud-SecurityCoreAccount-Id
+
+  ToolingCoreAccountId:
+    Description: "The ID of the Tooling core account"
+    Value: !Ref ToolingCoreAccount
+    Export:
+      Name: Hyoacloud-ToolingCoreAccount-Id
+
+  ProductionWorkloadAccountId:
+    Description: "The ID of the Production Workload account"
+    Value: !Ref ProductionWorkloadAccount
+    Export:
+      Name: Hyoacloud-ProductionWorkloadAccount-Id
+
+  StagingWorkloadAccountId:
+    Description: "The ID of the Staging Workload account"
+    Value: !Ref StagingWorkloadAccount
+    Export:
+      Name: Hyoacloud-StagingWorkloadAccount-Id
