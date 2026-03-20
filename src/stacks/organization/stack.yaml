@@ -27,17 +27,15 @@ Outputs:
   OrganizationId:
     Description: "The ID of the AWS Organization"
     Value: !GetAtt Organization.Id
-    Export:
-      Name: hyoacloud-organization-id
+
+  OrganizationRootId:
+    Description: "The ID of the AWS Organization Root"
+    Value: !GetAtt Organization.RootId
 
   CoreOuId:
     Description: "The ID of the Core Organizational Unit"
     Value: !Ref CoreOu
-    Export:
-      Name: hyoacloud-core-ou-id
 
   WorkloadOuId:
     Description: "The ID of the Workload Organizational Unit"
     Value: !Ref WorkloadOu
-    Export:
-      Name: hyoacloud-workload-ou-id

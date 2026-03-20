@@ -59,3 +59,12 @@ Resources:
         ToolingCoreAccountId: !GetAtt AccountsStack.Outputs.ToolingCoreAccountId
         ProductionWorkloadAccountId: !GetAtt AccountsStack.Outputs.ProductionWorkloadAccountId
         StagingWorkloadAccountId: !GetAtt AccountsStack.Outputs.StagingWorkloadAccountId
+
+  ScpStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./stacks/scp/stack.yaml
+      Parameters:
+        OrganizationRootId: !GetAtt OrganizationStack.Outputs.OrganizationRootId
+        CoreOuId: !GetAtt OrganizationStack.Outputs.CoreOuId
+        WorkloadOuId: !GetAtt OrganizationStack.Outputs.WorkloadOuId
