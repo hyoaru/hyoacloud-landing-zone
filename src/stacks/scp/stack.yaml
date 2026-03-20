@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Landing Zone Stack: SCPs"
+
+Parameters:
+  OrganizationRootId:
+    Type: String
+    Description: "The ID of the AWS Organization Root"
+  CoreOuId:
+    Type: String
+    Description: "The ID of the Core Organizational Unit"
+  WorkloadOuId:
+    Type: String
+    Description: "The ID of the Workload Organizational Unit"
+
+Resources:
+  OrganizationMemberTetherPolicy:
+    Type: AWS::Organizations::Policy
+    Properties:
+      Name: "OrganizationMemberTether"
+      Description: "Prevents member accounts from leaving the Organization."
+      Type: SERVICE_CONTROL_POLICY
+      Content: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Deny"
+            Action: "organizations:LeaveOrganization"
+            Resource: "*"
+      TargetIds: 
+        - !Ref OrganizationRootId
+
+  NoRootPolicy:
+    Type: AWS::Organizations::Policy
+    Properties:
+      Name: "NoRootActivityOnMemberAccounts"
+      Description: "Blocks any action by the Root user in member accounts."
+      Type: SERVICE_CONTROL_POLICY
+      Content: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Deny"
+            Action: "*"
+            Resource: "*"
+            Condition:
+              StringLike:
+                "aws:PrincipalArn": "arn:aws:iam::*:root"
+      TargetIds: 
+        - !Ref CoreOuId
+        - !Ref WorkloadOuId
+
+  RestrictRegionPolicy:
+    Type: AWS::Organizations::Policy
+    Properties:
+      Name: "RestrictRegion"
+      Description: "Denies all actions in any region except specified regions and required global services."
+      Type: SERVICE_CONTROL_POLICY
+      Content: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Deny"
+            NotAction:
+              - "iam:*"
+              - "organizations:*"
+              - "route53:*"
+              - "budgets:*"
+              - "support:*"
+              - "cloudfront:*"
+              - "wafv2:*"
+              - "globalaccelerator:*"
+              - "kms:*"
+            Resource: "*"
+            Condition:
+              StringNotEquals:
+                "aws:RequestedRegion":
+                  - "ap-southeast-1"
+      TargetIds: 
+        - !Ref CoreOuId
+        - !Ref WorkloadOuId
+  
